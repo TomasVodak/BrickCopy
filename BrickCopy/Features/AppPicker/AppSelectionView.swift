@@ -1,13 +1,13 @@
 import SwiftUI
 
 struct AppSelectionView: View {
-    @Environment(BlockManager.self) var blockManager
+    @Environment(SessionStore.self) var blockManager
 
     var body: some View {
         NavigationView {
             List {
                 Section {
-                    ForEach(BlockManager.presetApps) { app in
+                    ForEach(SessionStore.presetApps) { app in
                         Button {
                             blockManager.toggleApp(app.bundleId)
                         } label: {
@@ -43,5 +43,5 @@ struct AppSelectionView: View {
 
 #Preview {
     AppSelectionView()
-        .environment(BlockManager())
+        .environment(SessionStore())
 }

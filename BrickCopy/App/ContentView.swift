@@ -15,6 +15,12 @@ struct ContentView: View {
 
             AppSelectionView()
                 .tabItem { Label("Apps", systemImage: "square.grid.2x2") }
+
+            HistoryView()
+                .tabItem { Label("History", systemImage: "clock.fill") }
+
+            SettingsView()
+                .tabItem { Label("Settings", systemImage: "gearshape.fill") }
         }
         .tint(.orange)
     }
@@ -22,5 +28,5 @@ struct ContentView: View {
 
 #Preview {
     ContentView()
-        .environment(BlockManager())
+        .environment(SessionStore())
 }

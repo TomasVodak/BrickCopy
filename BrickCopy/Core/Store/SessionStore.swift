@@ -3,7 +3,7 @@ import Observation
 import UIKit
 
 @Observable
-class BlockManager {
+class SessionStore {
     var isSessionActive = false
     var elapsedSeconds = 0
     var selectedApps: Set<String> = []

@@ -9,12 +9,13 @@ import SwiftUI
 
 @main
 struct BrickCopyApp: App {
-    @State private var blockManager = BlockManager()
+    @State private var sessionStore = SessionStore()
 
     var body: some Scene {
         WindowGroup {
             ContentView()
-                .environment(blockManager)
+                .environment(sessionStore)
         }
+        .modelContainer(for: FocusSession.self)
     }
 }

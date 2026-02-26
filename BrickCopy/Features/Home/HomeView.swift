@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct HomeView: View {
-    @Environment(BlockManager.self) var blockManager
+    @Environment(SessionStore.self) var blockManager
     @State private var showEndConfirmation = false
 
     var body: some View {
@@ -89,5 +89,5 @@ struct HomeView: View {
 
 #Preview {
     HomeView()
-        .environment(BlockManager())
+        .environment(SessionStore())
 }
