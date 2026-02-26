@@ -9,12 +9,12 @@ import SwiftUI
 
 @main
 struct BrickCopyApp: App {
-    @StateObject private var blockManager = BlockManager()
+    @State private var blockManager = BlockManager()
 
     var body: some Scene {
         WindowGroup {
             ContentView()
-                .environmentObject(blockManager)
+                .environment(blockManager)
         }
     }
 }

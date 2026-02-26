@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct AppSelectionView: View {
-    @EnvironmentObject var blockManager: BlockManager
+    @Environment(BlockManager.self) var blockManager
 
     var body: some View {
         NavigationView {
@@ -43,5 +43,5 @@ struct AppSelectionView: View {
 
 #Preview {
     AppSelectionView()
-        .environmentObject(BlockManager())
+        .environment(BlockManager())
 }

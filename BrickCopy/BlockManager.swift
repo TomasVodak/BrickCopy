@@ -1,10 +1,12 @@
-import SwiftUI
+import Foundation
+import Observation
+import UIKit
 
-@MainActor
-class BlockManager: ObservableObject {
-    @Published var isSessionActive = false
-    @Published var elapsedSeconds = 0
-    @Published var selectedApps: Set<String> = []
+@Observable
+class BlockManager {
+    var isSessionActive = false
+    var elapsedSeconds = 0
+    var selectedApps: Set<String> = []
 
     private var timer: Timer?
 
@@ -34,14 +36,12 @@ class BlockManager: ObservableObject {
         elapsedSeconds = 0
         startTimer()
         UIImpactFeedbackGenerator(style: .heavy).impactOccurred()
-        // TODO: block apps — requires paid developer account (FamilyControls)
     }
 
     func endSession() {
         isSessionActive = false
         stopTimer()
         UIImpactFeedbackGenerator(style: .medium).impactOccurred()
-        // TODO: unblock apps — requires paid developer account (FamilyControls)
     }
 
     func toggleApp(_ bundleId: String) {
