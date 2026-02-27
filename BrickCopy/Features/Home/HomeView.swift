@@ -214,7 +214,7 @@ struct HomeView: View {
                 store.endSession()
             } else {
                 let name = store.currentProfile?.name ?? "this profile"
-                wrongTagMessage = "Wrong tag. Scan the "\(name)" tag to end this session."
+                wrongTagMessage = "Wrong tag. Scan the \"\(name)\" tag to end this session."
             }
         }
     }
