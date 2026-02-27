@@ -1,14 +1,34 @@
 import Foundation
 import Observation
 import UIKit
+import SwiftData
 
 @Observable
 class SessionStore {
+
+    // MARK: - Live session state
+
     var isSessionActive = false
     var elapsedSeconds = 0
-    var selectedApps: Set<String> = []
+    var currentProfile: BlockProfile?
+
+    // When lockMode is on and the profile has a linked tag, the session can
+    // only be ended by scanning that tag — not by tapping a button.
+    var isLocked: Bool {
+        guard let profile = currentProfile else { return false }
+        return profile.lockMode && profile.nfcTagId != nil
+    }
+
+    // Injected from the view layer so the store can persist sessions without
+    // importing SwiftUI or being a View itself.
+    var modelContext: ModelContext?
+
+    // MARK: - Private
 
     private var timer: Timer?
+    private var sessionStartedAt: Date = .now
+
+    // MARK: - Preset apps (used by ProfileEditView for app selection)
 
     static let presetApps: [DistractingApp] = [
         DistractingApp(name: "Instagram",   bundleId: "com.burbn.instagram",         icon: "camera"),
@@ -25,33 +45,56 @@ class SessionStore {
         DistractingApp(name: "Pinterest",   bundleId: "pinterest",                   icon: "mappin"),
     ]
 
-    init() {
-        if let saved = UserDefaults.standard.array(forKey: "selectedApps") as? [String] {
-            selectedApps = Set(saved)
-        }
-    }
+    // MARK: - Session lifecycle
 
-    func startSession() {
+    func startSession(with profile: BlockProfile) {
+        currentProfile = profile
+        sessionStartedAt = .now
         isSessionActive = true
         elapsedSeconds = 0
         startTimer()
+        // TODO: BlockingService.shared.blockApps(profile.blockedBundleIds)
         UIImpactFeedbackGenerator(style: .heavy).impactOccurred()
     }
 
+    // Ends the session and saves a FocusSession record.
+    // Call only when the session is legitimately allowed to end
+    // (i.e. either not locked, or called after a successful NFC scan).
     func endSession() {
+        guard let profile = currentProfile else { return }
+        saveSession(profile: profile)
         isSessionActive = false
+        currentProfile = nil
         stopTimer()
+        // TODO: BlockingService.shared.unblockAll()
         UIImpactFeedbackGenerator(style: .medium).impactOccurred()
     }
 
-    func toggleApp(_ bundleId: String) {
-        if selectedApps.contains(bundleId) {
-            selectedApps.remove(bundleId)
-        } else {
-            selectedApps.insert(bundleId)
-        }
-        UserDefaults.standard.set(Array(selectedApps), forKey: "selectedApps")
+    // Returns false and does nothing when the session is locked.
+    // Use this for the manual "End Session" button path.
+    @discardableResult
+    func tryEndManually() -> Bool {
+        guard !isLocked else { return false }
+        endSession()
+        return true
     }
+
+    // Called by NFCService after a successful tag read.
+    // Starts a session if idle, ends it if the correct tag is scanned.
+    func handleTagScan(profileId: String, allProfiles: [BlockProfile]) {
+        if isSessionActive {
+            if currentProfile?.id.uuidString == profileId {
+                endSession() // correct tag — end even if locked
+            }
+            // Wrong tag during a locked session: ignore (UI shows feedback)
+        } else {
+            if let profile = allProfiles.first(where: { $0.id.uuidString == profileId }) {
+                startSession(with: profile)
+            }
+        }
+    }
+
+    // MARK: - Display
 
     var formattedTime: String {
         let h = elapsedSeconds / 3600
@@ -60,6 +103,8 @@ class SessionStore {
         if h > 0 { return String(format: "%02d:%02d:%02d", h, m, s) }
         return String(format: "%02d:%02d", m, s)
     }
+
+    // MARK: - Private helpers
 
     private func startTimer() {
         timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
@@ -70,5 +115,17 @@ class SessionStore {
     private func stopTimer() {
         timer?.invalidate()
         timer = nil
+    }
+
+    private func saveSession(profile: BlockProfile) {
+        guard let context = modelContext else { return }
+        let session = FocusSession(
+            startedAt: sessionStartedAt,
+            profileName: profile.name,
+            blockedAppBundleIds: profile.blockedBundleIds
+        )
+        session.endedAt = .now
+        context.insert(session)
+        try? context.save()
     }
 }

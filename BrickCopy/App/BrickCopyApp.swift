@@ -17,6 +17,6 @@ struct BrickCopyApp: App {
             ContentView()
                 .environment(sessionStore)
         }
-        .modelContainer(for: FocusSession.self)
+        .modelContainer(for: [BlockProfile.self, FocusSession.self])
     }
 }

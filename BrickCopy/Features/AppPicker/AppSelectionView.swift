@@ -1,47 +1,52 @@
 import SwiftUI
 
+// Reusable app-selection list. Moved out of the tab bar — app selection now
+// lives inside ProfileEditView. This component accepts an explicit binding so
+// it can be dropped into any view that manages a set of blocked bundle IDs.
 struct AppSelectionView: View {
-    @Environment(SessionStore.self) var blockManager
+    @Binding var selectedBundleIds: Set<String>
+    var accentColor: Color = .orange
 
     var body: some View {
-        NavigationView {
-            List {
-                Section {
-                    ForEach(SessionStore.presetApps) { app in
-                        Button {
-                            blockManager.toggleApp(app.bundleId)
-                        } label: {
-                            HStack(spacing: 14) {
-                                Image(systemName: app.icon)
-                                    .frame(width: 36, height: 36)
-                                    .background(Color.orange.opacity(0.15))
-                                    .foregroundColor(.orange)
-                                    .cornerRadius(8)
+        List {
+            Section {
+                ForEach(SessionStore.presetApps) { app in
+                    Button {
+                        if selectedBundleIds.contains(app.bundleId) {
+                            selectedBundleIds.remove(app.bundleId)
+                        } else {
+                            selectedBundleIds.insert(app.bundleId)
+                        }
+                    } label: {
+                        HStack(spacing: 14) {
+                            Image(systemName: app.icon)
+                                .frame(width: 36, height: 36)
+                                .background(accentColor.opacity(0.15))
+                                .foregroundStyle(accentColor)
+                                .cornerRadius(8)
 
-                                Text(app.name)
-                                    .foregroundColor(.primary)
+                            Text(app.name)
+                                .foregroundStyle(.primary)
 
-                                Spacer()
+                            Spacer()
 
-                                Image(systemName: blockManager.selectedApps.contains(app.bundleId)
-                                      ? "checkmark.circle.fill" : "circle")
-                                    .foregroundColor(blockManager.selectedApps.contains(app.bundleId)
-                                                     ? .orange : .secondary)
-                            }
+                            Image(systemName: selectedBundleIds.contains(app.bundleId)
+                                  ? "checkmark.circle.fill" : "circle")
+                            .foregroundStyle(selectedBundleIds.contains(app.bundleId)
+                                             ? accentColor : .secondary)
                         }
                     }
-                } header: {
-                    Text("Select apps to block")
-                } footer: {
-                    Text("Actual app blocking will be enabled in a future update once a developer account is added.")
                 }
+            } header: {
+                Text("Select apps to block")
+            } footer: {
+                Text("Actual app blocking requires FamilyControls — coming in a future update.")
             }
-            .navigationTitle("Block Apps")
         }
     }
 }
 
 #Preview {
-    AppSelectionView()
-        .environment(SessionStore())
+    @Previewable @State var selected: Set<String> = []
+    AppSelectionView(selectedBundleIds: $selected)
 }

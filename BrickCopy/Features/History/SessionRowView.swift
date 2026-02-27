@@ -8,19 +8,21 @@ struct SessionRowView: View {
     let session: FocusSession
 
     var body: some View {
-        // TODO: full design pass
         HStack {
             VStack(alignment: .leading, spacing: 4) {
+                Text(session.profileName)
+                    .font(.subheadline.weight(.medium))
                 Text(session.startedAt.formatted(date: .abbreviated, time: .shortened))
-                    .font(.subheadline)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
                 Text(durationString)
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundStyle(.secondary)
             }
             Spacer()
-            Text("\(session.blockedAppBundleIds.count) apps")
+            Text("\(session.blockedAppBundleIds.count) app\(session.blockedAppBundleIds.count == 1 ? "" : "s")")
                 .font(.caption)
-                .foregroundColor(.orange)
+                .foregroundStyle(.orange)
         }
         .padding(.vertical, 4)
     }

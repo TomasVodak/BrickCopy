@@ -14,8 +14,8 @@ struct ContentView: View {
             HomeView()
                 .tabItem { Label("Focus", systemImage: "lock.fill") }
 
-            AppSelectionView()
-                .tabItem { Label("Apps", systemImage: "square.grid.2x2") }
+            ProfileListView()
+                .tabItem { Label("Profiles", systemImage: "person.crop.square.stack.fill") }
 
             HistoryView()
                 .tabItem { Label("History", systemImage: "clock.fill") }
@@ -30,5 +30,5 @@ struct ContentView: View {
 #Preview {
     ContentView()
         .environment(SessionStore())
-        .modelContainer(for: FocusSession.self, inMemory: true)
+        .modelContainer(for: [BlockProfile.self, FocusSession.self], inMemory: true)
 }
