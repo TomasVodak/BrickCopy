@@ -1,4 +1,5 @@
 import SwiftUI
+import SwiftData
 
 // A single row in the History list.
 // Shows: date, duration, number of apps blocked.
